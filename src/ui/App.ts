@@ -7,12 +7,14 @@ import {
   TransactionType,
 } from "../util/constants";
 import { TransactionService } from "../services/TransactionService";
-import { parseDate } from "../util/TransactionServiceHelper";
+import { parseDate, parseDateForInterest } from "../util/ServiceHelper";
 import { InterestService } from "../services/InterestService";
+import { AccountService } from "../services/AccountService";
 
-export class GICApp {
+export class App {
   private rl: readline.Interface;
   private transactionService: TransactionService;
+  private accountService: AccountService;
   private interestService: InterestService;
 
   constructor() {
@@ -22,6 +24,7 @@ export class GICApp {
     });
     this.transactionService = new TransactionService();
     this.interestService = new InterestService();
+    this.accountService = new AccountService();
   }
 
   start(): void {
@@ -187,12 +190,15 @@ export class GICApp {
 
       try {
         const printStatementDetails = answer.trim().split(" ");
-        this.validateDetails(printStatementDetails, 2);
+        this.validateDetails(printStatementDetails, 1);
 
-        // const account = this.transactionService.getAccount(accountId);
-        // if (!account) {
-        //   throw new Error(`Account ${accountId} not found`);
-        // }
+        const [accountId, yearMonth] = printStatementDetails;
+
+        const account = this.accountService.getAccount(accountId);
+
+        const transactions = this.transactionService.getTransactions(
+          parseDateForInterest(yearMonth)
+        );
       } catch (error) {
         if (error instanceof Error) {
           console.log(error.message);

@@ -1,7 +1,11 @@
 import { Account } from "../models/Account";
 import { Transaction } from "../models/Transaction";
-import { TransactionType } from "../util/constants";
-import { generateTransactionID } from "../util/TransactionServiceHelper";
+import {
+  ERROR_CODES,
+  PrintStatementDateProps,
+  TransactionType,
+} from "../util/constants";
+import { generateTransactionID } from "../util/ServiceHelper";
 import { AccountService } from "./AccountService";
 
 export class TransactionService {
@@ -19,12 +23,12 @@ export class TransactionService {
     amount: number
   ): void {
     const account = new Account(accountId);
-    this.accountService.getAccount(accountId);
+    this.accountService.addAccount(accountId);
 
     if (type === TransactionType.WITHDRAWAL) {
       const balance = this.getBalanceByDate(new Date());
       if (balance <= 0) {
-        throw new Error("Insufficient funds for withdrawal");
+        throw new Error(ERROR_CODES.INSUFFICIENT_FUNDS_ERROR);
       }
     }
 
@@ -44,7 +48,15 @@ export class TransactionService {
     this.transactions.push(transaction);
   }
 
-  getTransactions(): Transaction[] {
+  getTransactions(yearMonthProps?: PrintStatementDateProps): Transaction[] {
+    if (yearMonthProps?.month && yearMonthProps?.year) {
+      return this.transactions.filter((txn) => {
+        return (
+          txn.date.getFullYear() === yearMonthProps.year &&
+          txn.date.getMonth() + 1 === yearMonthProps.month
+        );
+      });
+    }
     return [...this.transactions];
   }
 

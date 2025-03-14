@@ -1,4 +1,5 @@
 import { Transaction } from "../models/Transaction";
+import { PrintStatementDateProps } from "./constants";
 
 export const parseDate = (dateStr: string): Date => {
   const year = parseInt(dateStr.substring(0, 4));
@@ -6,6 +7,14 @@ export const parseDate = (dateStr: string): Date => {
   const day = parseInt(dateStr.substring(6, 8));
   const date = new Date(year, month - 1, day);
   return date;
+};
+
+export const parseDateForInterest = (
+  dateString: string
+): PrintStatementDateProps => {
+  const year = parseInt(dateString.substring(0, 4));
+  const month = parseInt(dateString.substring(4, 6));
+  return { year, month };
 };
 
 export const formatDate = (date: Date): string => {

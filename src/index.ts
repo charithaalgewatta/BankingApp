@@ -1,4 +1,4 @@
-import { GICApp } from "./ui/GICApp";
+import { App } from "./ui/App";
 
-const app = new GICApp();
+const app = new App();
 app.start();
