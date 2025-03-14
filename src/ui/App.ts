@@ -72,18 +72,15 @@ export class App {
     console.log(
       "Please enter transaction details in <Date> <Account> <Type> <Amount> format \n(or enter blank to go back to main menu):"
     );
-    this.rl.question(">", (answer) => {
-      if (!answer.trim()) {
+    this.rl.question(">", (input) => {
+      const answer = input.trim();
+      if (!answer) {
         this.showMainMenu();
         return;
       }
       try {
         const transactionDetails = answer.split(" ");
-        // if (transactionDetails.length !== 4) {
-        //   console.log(ERROR_CODES.INSUFFICIENT_DETAILS_ERROR);
-        //   this.handleInputTransaction();
-        //   return;
-        // }
+
         this.validateDetails(transactionDetails, 4);
         const [date, accountId, type, amount] = transactionDetails;
         const parsedType = type.trim().toUpperCase() as TransactionType;
@@ -133,19 +130,15 @@ export class App {
     console.log(
       "Please enter interest rules details in <Date> <RuleId> <Rate in %> format (or enter blank to go back to main menu):"
     );
-    this.rl.question(">", (answer) => {
-      if (!answer.trim()) {
+    this.rl.question(">", (input) => {
+      const answer = input.trim();
+      if (!answer) {
         this.showMainMenu();
         return;
       }
 
       try {
         const interestDetails = answer.split(" ");
-        // if (transactionDetails.length !== 3) {
-        //   console.log(ERROR_CODES.INSUFFICIENT_DETAILS_ERROR);
-        //   this.handleInputTransaction();
-        //   return;
-        // }
         this.validateDetails(interestDetails, 3);
         const [date, ruleId, rate] = interestDetails;
 
@@ -182,8 +175,9 @@ export class App {
     console.log(
       "Please enter account and month to generate the statement <Account> <Year><Month> (or enter blank to go back to main menu):"
     );
-    this.rl.question(">", (answer) => {
-      if (!answer.trim()) {
+    this.rl.question(">", (input) => {
+      const answer = input.trim();
+      if (!answer) {
         this.showMainMenu();
         return;
       }
