@@ -26,6 +26,13 @@ export const formatDate = (date: Date): string => {
   }`;
 };
 
+export const formatYearMonth = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}${month}${day}`;
+};
+
 export const generateTransactionID = (
   transactions: Transaction[],
   date: Date
@@ -43,8 +50,7 @@ export const generateTransactionID = (
   );
 
   const transactionId = latestTxnNumber + 1;
-  return `
-      ${formatDate(date)}-${
+  return `${formatDate(date)}-${
     transactionId < 10 ? "0" + transactionId : transactionId.toString()
   }`;
 };

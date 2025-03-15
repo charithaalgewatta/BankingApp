@@ -10,24 +10,19 @@ import { AccountService } from "./AccountService";
 
 export class TransactionService {
   private transactions: Transaction[] = [];
-  private accountService: AccountService;
-
-  constructor() {
-    this.accountService = new AccountService();
-  }
 
   processTransaction(
     date: Date,
     accountId: string,
     type: TransactionType,
     amount: number
-  ): void {
-    const account = new Account(accountId);
-    this.accountService.addAccount(accountId);
+  ): Transaction {
+    const accountService = AccountService.getInstance();
+    accountService.addAccount(accountId);
 
     if (type === TransactionType.WITHDRAWAL) {
-      const balance = this.getBalanceByDate(new Date());
-      if (balance <= 0) {
+      const balance = this.getBalanceByDate(date);
+      if (balance < amount) {
         throw new Error(ERROR_CODES.INSUFFICIENT_FUNDS_ERROR);
       }
     }
@@ -42,13 +37,17 @@ export class TransactionService {
     );
 
     this.createTransaction(transaction);
+
+    return transaction;
   }
 
-  createTransaction(transaction: Transaction): void {
+  public createTransaction(transaction: Transaction): void {
     this.transactions.push(transaction);
   }
 
-  getTransactions(yearMonthProps?: PrintStatementDateProps): Transaction[] {
+  public getTransactions(
+    yearMonthProps?: PrintStatementDateProps
+  ): Transaction[] {
     if (yearMonthProps?.month && yearMonthProps?.year) {
       return this.transactions.filter((txn) => {
         return (

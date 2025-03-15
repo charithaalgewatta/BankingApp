@@ -8,4 +8,8 @@ export class Transaction {
     public readonly type: TransactionType,
     public readonly amount: number
   ) {}
+
+  //   isInterest(): boolean {
+  //     return this.type === TransactionType.INTEREST;
+  //   }
 }

@@ -5,6 +5,7 @@ import {
   ERROR_CODES,
   InputType,
   TransactionType,
+  yearMonthValidation,
 } from "../util/constants";
 import { TransactionService } from "../services/TransactionService";
 import { parseDate, parseDateForInterest } from "../util/ServiceHelper";
@@ -24,7 +25,7 @@ export class App {
     });
     this.transactionService = new TransactionService();
     this.interestService = new InterestService();
-    this.accountService = new AccountService();
+    this.accountService = AccountService.getInstance();
   }
 
   start(): void {
@@ -88,20 +89,14 @@ export class App {
         this.validateDate(date);
 
         if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-          console.log(ERROR_CODES.INVALID_AMOUNT);
-          this.handleInputTransaction();
-          return;
+          throw new Error(ERROR_CODES.INVALID_AMOUNT);
         }
         if (!amountValidation.test(amount)) {
-          console.log(ERROR_CODES.AMOUNT_FORMAT_ERROR);
-          this.handleInputTransaction();
-          return;
+          throw new Error(ERROR_CODES.AMOUNT_FORMAT_ERROR);
         }
 
         if (!Object.values(TransactionType).includes(parsedType)) {
-          console.log(ERROR_CODES.INVALID_TXN_TYPE_ERROR);
-          this.handleInputTransaction();
-          return;
+          throw new Error(ERROR_CODES.INVALID_TXN_TYPE_ERROR);
         }
 
         this.transactionService.processTransaction(
@@ -145,9 +140,7 @@ export class App {
         this.validateDate(date);
 
         if (parseFloat(rate) <= 0 || parseFloat(rate) > 100) {
-          console.log(ERROR_CODES.INVALID_INTEREST_AMOUNT);
-          this.handleInterestRules();
-          return;
+          throw new Error(ERROR_CODES.INVALID_INTEREST_AMOUNT);
         }
 
         this.interestService.processInterestRule(
@@ -184,15 +177,43 @@ export class App {
 
       try {
         const printStatementDetails = answer.trim().split(" ");
-        this.validateDetails(printStatementDetails, 1);
+        this.validateDetails(printStatementDetails, 2);
 
         const [accountId, yearMonth] = printStatementDetails;
 
-        const account = this.accountService.getAccount(accountId);
+        this.validateYearMonth(yearMonth);
 
-        const transactions = this.transactionService.getTransactions(
-          parseDateForInterest(yearMonth)
+        // const account = this.accountService.getAccount(accountId);
+        const { year, month } = parseDateForInterest(yearMonth);
+
+        const interest = this.interestService.calculateInterest(
+          year,
+          month,
+          this.transactionService
         );
+
+        const lastDay = new Date(year, month, 0).getDate();
+
+        console.log("interest", interest);
+        if (interest > 0) {
+          console.log("Interest calculated for the month");
+          const interestDate = new Date(year, month - 1, lastDay);
+          this.transactionService.createTransaction({
+            date: interestDate,
+            accountId,
+            type: TransactionType.INTEREST,
+            amount: interest,
+            id: "",
+          });
+        }
+
+        // const transactions = this.transactionService.getTransactions(
+        //   parseDateForInterest(yearMonth)
+        // );
+
+        this.displayMonthlyStatement(accountId, year, month);
+        console.log("Is there anything else you'd like to do?");
+        this.showMainMenu();
       } catch (error) {
         if (error instanceof Error) {
           console.log(error.message);
@@ -244,9 +265,67 @@ export class App {
     console.log("\n");
   }
 
+  private displayMonthlyStatement(
+    accountId: string,
+    year: number,
+    month: number
+  ): void {
+    console.log(`Account: ${accountId}`);
+    console.log("| Date     | Txn Id      | Type | Amount | Balance |");
+
+    let runningBalance = 0;
+    const allTransactions = this.transactionService
+      .getTransactions({ year, month })
+      .sort(
+        (a, b) =>
+          a.date.getTime() - b.date.getTime() ||
+          (a.type === TransactionType.INTEREST ? 1 : 0) -
+            (b.type === TransactionType.INTEREST ? 1 : 0)
+      );
+
+    const startOfMonth = new Date(year, month - 1, 1);
+    runningBalance = this.transactionService.getBalanceByDate(
+      new Date(startOfMonth.getTime() - 1)
+    );
+
+    for (const txn of allTransactions) {
+      if (
+        txn.type === TransactionType.DEPOSIT ||
+        txn.type === TransactionType.INTEREST
+      ) {
+        runningBalance += txn.amount;
+      } else if (txn.type === TransactionType.WITHDRAWAL) {
+        runningBalance -= txn.amount;
+      }
+
+      const txnDate = txn.date;
+      const dateFormatted = `${txnDate.getFullYear()}${(txnDate.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}${txnDate.getDate().toString().padStart(2, "0")}`;
+      const txnIdFormatted =
+        txn.type === TransactionType.INTEREST ? "" : txn.id;
+      const typeFormatted = txn.type;
+      const amountFormatted = txn.amount.toFixed(2);
+      const balanceFormatted = runningBalance.toFixed(2);
+
+      console.log(
+        `| ${dateFormatted} | ${txnIdFormatted.padEnd(
+          11
+        )} | ${typeFormatted}    | ${amountFormatted.padStart(
+          6
+        )} | ${balanceFormatted.padStart(7)} |`
+      );
+    }
+  }
+
   private validateDetails(details: string[], numberOfDetails: number): void {
     if (details.length !== numberOfDetails) {
       throw new Error(ERROR_CODES.INSUFFICIENT_DETAILS_ERROR);
+    }
+  }
+  private validateYearMonth(yearMonthStr: string): void {
+    if (!yearMonthValidation.test(yearMonthStr)) {
+      throw new Error(ERROR_CODES.INVALID_YEAR_MONTH_FORMAT_ERROR);
     }
   }
 

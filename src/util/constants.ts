@@ -8,6 +8,7 @@ export enum InputType {
 export enum TransactionType {
   DEPOSIT = "D",
   WITHDRAWAL = "W",
+  INTEREST = "I",
 }
 
 export type PrintStatementDateProps = {
@@ -17,11 +18,14 @@ export type PrintStatementDateProps = {
 
 export const dateValidation = /^\d{4}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/;
 
+export const yearMonthValidation = /^\d{4}(0[1-9]|1[0-2])$/;
+
 export const amountValidation = /^\d+(\.\d{1,2})?$/;
 
 export enum ERROR_CODES {
   INSUFFICIENT_DETAILS_ERROR = "Insufficient details. One or more fields are missing",
-  INVALID_DATE_FORMAT_ERROR = "Invalid date format. The date should be in YYYYMMdd format",
+  INVALID_DATE_FORMAT_ERROR = "Invalid date format. Please enter the date in YYYYMMdd format",
+  INVALID_YEAR_MONTH_FORMAT_ERROR = "Invalid year or month format. Please enter the year and month in YYYYMM format",
   INVALID_DATE_ERROR = "Invalid date. The date should be less than or equal to today's date",
   INVALID_AMOUNT = "The amount has to be greater than 0",
   INVALID_INTEREST_AMOUNT = "The amount has to be greater than 0 and less than 100",
