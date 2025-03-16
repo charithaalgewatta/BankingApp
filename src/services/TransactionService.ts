@@ -1,4 +1,3 @@
-import { Account } from "../models/Account";
 import { Transaction } from "../models/Transaction";
 import {
   ERROR_CODES,
