@@ -13,6 +13,7 @@ describe("TransactionService", () => {
   });
 
   test("should add transactions correctly", () => {
+    accountService.addAccount("AC001");
     const transaction = new Transaction(
       "20230101-01",
       new Date(2023, 0, 1),
@@ -48,7 +49,7 @@ describe("TransactionService", () => {
     const transaction = new Transaction(
       "20230101-01",
       new Date(2023, 0, 1),
-      "AC002", // Different account ID
+      "AC002",
       TransactionType.DEPOSIT,
       100
     );
@@ -56,10 +57,8 @@ describe("TransactionService", () => {
     expect(() => transactionService.createTransaction(transaction)).toThrow();
   });
 
-  test.only("should reject withdrawals that exceed balance", () => {
+  test("should reject withdrawals that exceed balance", () => {
     const date = new Date(2023, 5, 1);
-
-    // First deposit
     transactionService.processTransaction(
       date,
       "AC001",
@@ -67,7 +66,6 @@ describe("TransactionService", () => {
       100
     );
 
-    // Valid withdrawal
     expect(() => {
       transactionService.processTransaction(
         date,
@@ -77,7 +75,6 @@ describe("TransactionService", () => {
       );
     }).not.toThrow();
 
-    // Invalid withdrawal (exceeds balance)
     expect(() => {
       transactionService.processTransaction(
         date,
@@ -116,7 +113,6 @@ describe("TransactionService", () => {
   });
 
   test("should calculate balance correctly", () => {
-    // Initial deposit
     transactionService.createTransaction(
       new Transaction(
         "20230101-01",
@@ -127,7 +123,6 @@ describe("TransactionService", () => {
       )
     );
 
-    // Another deposit
     transactionService.createTransaction(
       new Transaction(
         "20230102-01",
@@ -138,7 +133,6 @@ describe("TransactionService", () => {
       )
     );
 
-    // Withdrawal
     transactionService.createTransaction(
       new Transaction(
         "20230103-01",
@@ -155,7 +149,6 @@ describe("TransactionService", () => {
   });
 
   test("should filter transactions by month correctly", () => {
-    // January transaction
     transactionService.createTransaction(
       new Transaction(
         "20230101-01",
@@ -166,7 +159,6 @@ describe("TransactionService", () => {
       )
     );
 
-    // February transaction
     transactionService.createTransaction(
       new Transaction(
         "20230201-01",
@@ -188,7 +180,7 @@ describe("TransactionService", () => {
 
     expect(janTransactions).toHaveLength(1);
     expect(febTransactions).toHaveLength(1);
-    expect(janTransactions[0].date.getMonth()).toBe(0); // January is 0
-    expect(febTransactions[0].date.getMonth()).toBe(1); // February is 1
+    expect(janTransactions[0].date.getMonth()).toBe(0);
+    expect(febTransactions[0].date.getMonth()).toBe(1);
   });
 });

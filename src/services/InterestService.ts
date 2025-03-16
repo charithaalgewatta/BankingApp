@@ -39,18 +39,12 @@ export class InterestService {
     prevDate.setDate(prevDate.getDate() - 1);
 
     let currentBalance = transactionService.getBalanceByDate(prevDate);
-
-    console.log("currentBalance", currentBalance);
-    console.log("transactionService", transactionService.getTransactions());
-
     const monthTransactions = transactionService
       .getTransactions({
-        month: year,
-        year: month,
+        month: month,
+        year: year,
       })
       .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    console.log("monthTransactions", monthTransactions);
 
     const transactionsByDate = new Map<string, Transaction[]>();
     monthTransactions.forEach((txn) => {

@@ -42,6 +42,14 @@ export class TransactionService {
   }
 
   public createTransaction(transaction: Transaction): void {
+    if (
+      transaction.accountId !==
+      AccountService.getInstance()
+        .getAccount(transaction.accountId)
+        ?.getAccountId()
+    ) {
+      throw new Error(ERROR_CODES.NO_ACCOUNT_ERROR);
+    }
     this.transactions.push(transaction);
   }
 

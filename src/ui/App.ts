@@ -8,14 +8,16 @@ import {
   yearMonthValidation,
 } from "../util/constants";
 import { TransactionService } from "../services/TransactionService";
-import { parseDate, parseDateForInterest } from "../util/ServiceHelper";
+import {
+  formatDate,
+  parseDate,
+  parseDateForInterest,
+} from "../util/ServiceHelper";
 import { InterestService } from "../services/InterestService";
-import { AccountService } from "../services/AccountService";
 
 export class App {
   private rl: readline.Interface;
   private transactionService: TransactionService;
-  private accountService: AccountService;
   private interestService: InterestService;
 
   constructor() {
@@ -25,7 +27,6 @@ export class App {
     });
     this.transactionService = new TransactionService();
     this.interestService = new InterestService();
-    this.accountService = AccountService.getInstance();
   }
 
   start(): void {
@@ -183,7 +184,6 @@ export class App {
 
         this.validateYearMonth(yearMonth);
 
-        // const account = this.accountService.getAccount(accountId);
         const { year, month } = parseDateForInterest(yearMonth);
 
         const interest = this.interestService.calculateInterest(
@@ -194,9 +194,7 @@ export class App {
 
         const lastDay = new Date(year, month, 0).getDate();
 
-        console.log("interest", interest);
         if (interest > 0) {
-          console.log("Interest calculated for the month");
           const interestDate = new Date(year, month - 1, lastDay);
           this.transactionService.createTransaction({
             date: interestDate,
@@ -206,10 +204,6 @@ export class App {
             id: "",
           });
         }
-
-        // const transactions = this.transactionService.getTransactions(
-        //   parseDateForInterest(yearMonth)
-        // );
 
         this.displayMonthlyStatement(accountId, year, month);
         console.log("Is there anything else you'd like to do?");
@@ -232,14 +226,10 @@ export class App {
 
     this.transactionService.getTransactions().forEach((txn) => {
       const txnDate = txn.date;
-      const dateFormatted = `${txnDate.getFullYear()}${(txnDate.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}${txnDate.getDate().toString().padStart(2, "0")}`;
-      const typeFormatted = txn.type;
       const amountFormatted = txn.amount.toFixed(2);
-
+      const dateFormatted = formatDate(txnDate);
       console.log(
-        `| ${dateFormatted} | ${txn.id} | ${typeFormatted}    | ${amountFormatted} |`
+        `| ${dateFormatted} | ${txn.id} | ${txn.type}    | ${amountFormatted} |`
       );
     });
     console.log("\n");
@@ -251,11 +241,7 @@ export class App {
 
     this.interestService.getInterestRules().forEach((rule) => {
       const ruleDate = rule.date;
-      const dateFormatted = `${ruleDate.getFullYear()}${(
-        ruleDate.getMonth() + 1
-      )
-        .toString()
-        .padStart(2, "0")}${ruleDate.getDate().toString().padStart(2, "0")}`;
+      const dateFormatted = formatDate(ruleDate);
       const rateFormatted = rule.rate.toFixed(2);
 
       console.log(
@@ -299,21 +285,18 @@ export class App {
       }
 
       const txnDate = txn.date;
-      const dateFormatted = `${txnDate.getFullYear()}${(txnDate.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}${txnDate.getDate().toString().padStart(2, "0")}`;
+      const dateFormatted = formatDate(txnDate);
       const txnIdFormatted =
         txn.type === TransactionType.INTEREST ? "" : txn.id;
-      const typeFormatted = txn.type;
       const amountFormatted = txn.amount.toFixed(2);
       const balanceFormatted = runningBalance.toFixed(2);
 
       console.log(
-        `| ${dateFormatted} | ${txnIdFormatted.padEnd(
-          11
-        )} | ${typeFormatted}    | ${amountFormatted.padStart(
-          6
-        )} | ${balanceFormatted.padStart(7)} |`
+        `| ${dateFormatted} | ${txnIdFormatted.padEnd(11)} | ${
+          txn.type
+        }    | ${amountFormatted.padStart(6)} | ${balanceFormatted.padStart(
+          7
+        )} |`
       );
     }
   }
