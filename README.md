@@ -12,7 +12,7 @@ Follow these steps to run the app:
 1. **Clone the Repository**
 
    ```sh
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/charithaalgewatta/GICBankingApp
    cd your-repo
    ```
 
@@ -22,19 +22,11 @@ Follow these steps to run the app:
    npm install
    ```
 
-3. **Set Up Environment Variables**
-
-   - Create a `.env` file in the root directory.
-   - Add the necessary environment variables as specified in `.env.example`.
-
-4. **Run the Application**
+3. **Run the Application**
 
    ```sh
    npm start
    ```
-
-5. **Access the Application**
-   - Open your browser and navigate to `http://localhost:3000`.
 
 ## Running Tests
 
