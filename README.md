@@ -12,8 +12,8 @@ Follow these steps to run the app:
 1. **Clone the Repository**
 
    ```sh
-   git clone https://github.com/charithaalgewatta/GICBankingApp
-   cd GICBankingApp
+   git clone https://github.com/charithaalgewatta/BankingApp
+   cd BankingApp
    ```
 
 2. **Install Dependencies**
