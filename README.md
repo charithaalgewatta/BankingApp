@@ -13,7 +13,7 @@ Follow these steps to run the app:
 
    ```sh
    git clone https://github.com/charithaalgewatta/GICBankingApp
-   cd your-repo
+   cd GICBankingApp
    ```
 
 2. **Install Dependencies**
